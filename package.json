@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "scripts": {
     "dev": "nuxt",
-    "build": "CI=false && nuxt build"
+    "build": "nuxt build"
   },
   "dependencies": {
     "@nuxtjs/device": "^2.1.0",

@@ -34,10 +34,12 @@ const categoryMethods = {
     }),
 };
 
+// ADDED by Daskiro
+// Products and Shipping Methods are predefined to be used in cart page.
 const cartMethods = {
   load: async () =>
     new Promise((resolve) => {
-      setTimeout(() => {
+      setTimeout(() =>
         resolve({
           products: [
             {
@@ -124,8 +126,8 @@ const cartMethods = {
                 "Novelty! From now on you have the option of picking up an order in the selected InPack parceled. Just remember that in the case of orders paid on delivery, only the card payment will be accepted.",
             },
           ],
-        });
-      }, 800);
+        }
+        ), 1);
     }),
 };
 

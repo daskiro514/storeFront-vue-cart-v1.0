@@ -1,84 +1,90 @@
 <template>
-  <div id="detailed-cart">
-    <div class="detailed-cart">
-      <div v-if="totalItems" class="detailed-cart__aside">
-        <SfOrderSummary
-          orderTitle="Totals"
-          :order="{orderItems: cart.products, shipping: {shippingMethod: cart.shippingMethods[2]}}"
-          :propertiesNames='["Products","Subtotal","Shipping","Total price"]'
-        />
+  <div id="cart">
+    <LazyHydrate when-visible>
+      <!-- Added by Daskiro
+      It shows rotating spinner when data is not ready and the page is getting data -->
+      <SfLoader v-if="cartLoading" />
+
+      <div class="detailed-cart" v-else>
+        <div v-if="totalItems" class="detailed-cart__aside">
+          <SfOrderSummary
+            orderTitle="Totals"
+            :order="{orderItems: products, shipping: {shippingMethod: shippingMethods[2]}}"
+            :propertiesNames='["Products","Subtotal","Shipping","Total price"]'
+          />
+        </div>
+        <div class="detailed-cart__main">
+          <transition name="sf-fade" mode="out-in">
+            <div
+              v-if="totalItems"
+              key="detailed-cart"
+              class="collected-product-list"
+            >
+              <transition-group name="sf-fade" tag="div">
+                <SfCollectedProduct
+                  v-for="product in products"
+                  :key="product.id"
+                  v-model="product.qty"
+                  :image="product.image"
+                  :title="product.title"
+                  :regular-price="
+                    product.price.regular && `$${product.price.regular}`
+                  "
+                  :special-price="
+                    product.price.special && `$${product.price.special}`
+                  "
+                  class="sf-collected-product--detailed collected-product"
+                  @click:remove="removeHandler(product)"
+                >
+                  <template #configuration>
+                    <div class="collected-product__properties">
+                      <SfProperty
+                        v-for="(property, key) in product.configuration"
+                        :key="key"
+                        :name="property.name"
+                        :value="property.value"
+                      />
+                    </div>
+                  </template>
+                  <template #actions>
+                    <div class="actions desktop-only">
+                      <SfButton class="sf-button--text actions__button"
+                        >Edit</SfButton
+                      >
+                      <SfButton class="sf-button--text actions__button"
+                        >Save for later</SfButton
+                      >
+                      <SfButton class="sf-button--text actions__button"
+                        >Add to compare</SfButton
+                      >
+                    </div>
+                  </template>
+                </SfCollectedProduct>
+              </transition-group>
+            </div>
+            <div v-else key="empty-cart" class="empty-cart">
+              <SfImage
+                :src="require('@storefront-ui/shared/icons/empty_cart.svg')"
+                alt="Empty cart"
+                class="empty-cart__image"
+                :width="140"
+                :height="200"
+              />
+              <SfHeading
+                title="Your cart is empty"
+                :level="2"
+                description="Looks like you haven't added any items to the cart yet. Start
+                  shopping to fill it in."
+              />
+              <SfButton
+                class="sf-button--full-width color-primary empty-cart__button"
+                >Start shopping
+              </SfButton>
+            </div>
+          </transition>
+        </div>
       </div>
-      <div class="detailed-cart__main">
-        <transition name="sf-fade" mode="out-in">
-          <div
-            v-if="totalItems"
-            key="detailed-cart"
-            class="collected-product-list"
-          >
-            <transition-group name="sf-fade" tag="div">
-              <SfCollectedProduct
-                v-for="product in products"
-                :key="product.id"
-                v-model="product.qty"
-                :image="product.image"
-                :title="product.title"
-                :regular-price="
-                  product.price.regular && `$${product.price.regular}`
-                "
-                :special-price="
-                  product.price.special && `$${product.price.special}`
-                "
-                class="sf-collected-product--detailed collected-product"
-                @click:remove="removeHandler(product)"
-              >
-                <template #configuration>
-                  <div class="collected-product__properties">
-                    <SfProperty
-                      v-for="(property, key) in product.configuration"
-                      :key="key"
-                      :name="property.name"
-                      :value="property.value"
-                    />
-                  </div>
-                </template>
-                <template #actions>
-                  <div class="actions desktop-only">
-                    <SfButton class="sf-button--text actions__button"
-                      >Edit</SfButton
-                    >
-                    <SfButton class="sf-button--text actions__button"
-                      >Save for later</SfButton
-                    >
-                    <SfButton class="sf-button--text actions__button"
-                      >Add to compare</SfButton
-                    >
-                  </div>
-                </template>
-              </SfCollectedProduct>
-            </transition-group>
-          </div>
-          <div v-else key="empty-cart" class="empty-cart">
-            <SfImage
-              :src="require('@storefront-ui/shared/icons/empty_cart.svg')"
-              alt="Empty cart"
-              class="empty-cart__image"
-              :width="140"
-              :height="200"
-            />
-            <SfHeading
-              title="Your cart is empty"
-              :level="2"
-              description="Looks like you haven't added any items to the cart yet. Start
-                shopping to fill it in."
-            />
-            <SfButton
-              class="sf-button--full-width color-primary empty-cart__button"
-              >Start shopping
-            </SfButton>
-          </div>
-        </transition>
-      </div>
-    </div>
+    </LazyHydrate>
   </div>
 </template>
 <script>
@@ -86,30 +92,35 @@ import {
   SfCollectedProduct,
   SfButton,
   SfImage,
+  SfLoader,
   SfProperty,
   SfHeading,
   SfBreadcrumbs,
   SfOrderSummary,
 } from "@storefront-ui/vue";
+import LazyHydrate from "vue-lazy-hydration";
 import { useCart } from "~/stubVueStorefrontIntegration/composables";
 import { onSSR } from "@vue-storefront/core";
 
 export default {
-  name: "DetailedCart",
+  name: "Cart",
   components: {
     SfCollectedProduct,
     SfBreadcrumbs,
     SfImage,
     SfButton,
+    SfLoader,
     SfHeading,
     SfProperty,
     SfOrderSummary,
+    LazyHydrate
   },
   setup() {
     const {
       load: getCartContent,
       cart,
-    } = useCart();
+      loading: cartLoading,
+    } = useCart('cart');
 
     onSSR(async () => {
       await getCartContent({});
@@ -117,17 +128,21 @@ export default {
 
     return {
       cart,
+      cartLoading
     };
   },
   data() {
     return {
-      products: [
- 
-      ],
-      shippingMethods: [
- 
-      ],
+      products: [],
+      shippingMethods: [],
     };
+  },
+  // Waiting the cart data changed
+  watch: {
+    cart: function (val) {
+      this.products = [...this.cart.products];
+      this.shippingMethods = [...this.cart.shippingMethods];
+    }
   },
   computed: {
     totalItems() {
@@ -140,9 +155,12 @@ export default {
       this.products = products.filter((element) => element.id !== product.id);
     },
   },
+  // Assigning the data value when the page loaded
   mounted: function () {
-    this.products = [...this.cart.products];
-    this.shippingMethods = [...this.cart.shippingMethods];
+    if (this.cart) {
+      this.products = [...this.cart.products];
+      this.shippingMethods = [...this.cart.shippingMethods];
+    }
   }
 };
 </script>

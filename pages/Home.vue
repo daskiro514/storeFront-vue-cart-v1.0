@@ -1,50 +1,53 @@
 <template>
   <div id="home">
-    <SfHero class="hero">
-      <SfHeroItem
-        v-for="(hero, i) in content.heroes"
-        :key="i"
-        :title="hero.title"
-        :subtitle="hero.subtitle"
-        :button-text="hero.buttonText"
-        :background="hero.background"
-        :image="hero.image"
-        :class="hero.className"
-      />
-    </SfHero>
     <LazyHydrate when-visible>
-      <SfBannerGrid :banner-grid="1" class="banner-grid">
-        <template v-for="item in content.banners" #[item.slot]>
-          <SfBanner
-            :key="item.slot"
-            :title="item.title"
-            :subtitle="item.subtitle"
-            :description="item.description"
-            :button-text="item.buttonText"
-            :image="item.image"
-            :class="item.class"
+      <!-- Adde by Daskiro
+      Prevent Error In Routing -->
+      <SfLoader v-if="contentLoading" />
+      <div v-else>
+        <SfHero class="hero">
+          <SfHeroItem
+            v-for="(hero, i) in content.heroes"
+            :key="i"
+            :title="hero.title"
+            :subtitle="hero.subtitle"
+            :button-text="hero.buttonText"
+            :background="hero.background"
+            :image="hero.image"
+            :class="hero.className"
           />
-        </template>
-      </SfBannerGrid>
+        </SfHero>
+        <LazyHydrate when-visible>
+          <SfBannerGrid :banner-grid="1" class="banner-grid">
+            <template v-for="item in content.banners" #[item.slot]>
+              <SfBanner
+                :key="item.slot"
+                :title="item.title"
+                :subtitle="item.subtitle"
+                :description="item.description"
+                :button-text="item.buttonText"
+                :image="item.image"
+                :class="item.class"
+              />
+            </template>
+          </SfBannerGrid>
+        </LazyHydrate>
+        <SfCallToAction
+          title="Subscribe to Newsletters"
+          button-text="Subscribe"
+          description="Be aware of upcoming sales and events. Receive gifts and special offers!"
+          image="https://cdn.shopify.com/s/files/1/0407/1902/4288/files/newsletter_1240x202.jpg?v=1616496568"
+          class="call-to-action"
+        />
+      </div>
     </LazyHydrate>
-    <LazyHydrate when-visible> </LazyHydrate>
-
-    <LazyHydrate when-visible>
-      <SfCallToAction
-        title="Subscribe to Newsletters"
-        button-text="Subscribe"
-        description="Be aware of upcoming sales and events. Receive gifts and special offers!"
-        image="https://cdn.shopify.com/s/files/1/0407/1902/4288/files/newsletter_1240x202.jpg?v=1616496568"
-        class="call-to-action"
-      />
-    </LazyHydrate>
-    <LazyHydrate when-visible> </LazyHydrate>
   </div>
 </template>
 <script lang="ts">
 import {
   SfHero,
   SfBanner,
+  SfLoader,
   SfCallToAction,
   SfSection,
   SfCarousel,
@@ -63,6 +66,7 @@ export default {
   components: {
     SfHero,
     SfBanner,
+    SfLoader,
     SfCallToAction,
     SfSection,
     SfCarousel,
@@ -202,10 +206,6 @@ export default {
 }
 
 .carousel {
-  margin: 0 calc(var(--spacer-sm) * -1) 0 0;
-  @include for-desktop {
-    margin: 0;
-  }
   &__item {
     margin: 1.375rem 0 2.5rem 0;
     @include for-desktop {
